@@ -1,0 +1,54 @@
+version: '3.6'
+
+services:
+
+  postgres:
+    image: postgres
+    volumes:
+      - postgres:/var/lib/postgresql
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PWD}
+      POOL: 100
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:5
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/var/lib/redis
+    env_file: .env
+    environment:
+      REDIS_PASSWORD: ${REDIS_PWD}
+
+  elixir:
+    build: .
+    ports:
+      - "4001:4001"
+      - "4002:4002"
+      - "4003:4003"
+      - "4004:4004"
+      - "4101:4101"
+      - "4102:4102"
+      - "4103:4103"
+      - "4104:4104"
+    volumes:
+      - ".:/app"
+      - "/app/deps"
+      - "/app/apps/admin/assets/node_modules"
+    depends_on:
+      - postgres
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PWD}
+      POSTGRES_DB_TEST: ${PSQL_DB_TEST}
+      POSTGRES_DB_DEV: ${PSQL_DB}
+      POSTGRES_HOST: ${PSQL_HOST}
+
+volumes:
+  postgres:
+  redis:
